@@ -56,24 +56,41 @@ class Manager
         return $this->plugins;
     }
 
+    /**
+     * 检查插件是否启用
+     *
+     * @param $slug
+     * @return bool
+     */
     public function checkEnable($slug)
     {
         return in_array($slug,$this->ena_plugins);
     }
 
-    public function trigger($hook, $default=null, $data=null, $last=false, $returnArray=false)
+    /**
+     * 触发钩子
+     *
+     * @param string $hook_name
+     * @param string|callable|null $default
+     * @param mixed $data
+     * @param bool $last
+     * @param bool $returnArray
+     * @return array|string|null
+     */
+    public function trigger($hook_name, $default=null, $data=null, $last=false, $returnArray=false)
     {
         $hasRun=false;$return=null;
+        $hooks=$this->hooks[$hook_name]??[];
         if ($returnArray) $return=[];
         if ($last) {
-            $hook=Arr::last($this->hooks[$hook]);
+            $hook=Arr::last($hooks);
             if (is_callable([$hook['plugin'],$hook['func']])) {
                 $return=$hook['plugin']->$hook['func']($data);
                 if ($returnArray) $return=[$return];
                 $hasRun=true;
             }
         } else {
-            foreach ((array) $this->hooks[$hook] as $hook) {
+            foreach ((array) $hooks as $hook) {
                 if (is_callable([$hook['plugin'],$hook['func']])) {
                     $result=$hook['plugin']->$hook['func']($data);
                     if ($returnArray) $return[]=$result;
