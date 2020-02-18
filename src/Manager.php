@@ -18,8 +18,18 @@ class Manager
      */
     private $plugins = [];
 
+    /**
+     * 启用插件列表
+     *
+     * @var array
+     */
     private $ena_plugins;
 
+    /**
+     * 定义钩子列表
+     *
+     * @var array
+     */
     private $hooks = [];
 
     public function __construct()
@@ -41,8 +51,15 @@ class Manager
         if ($plugin instanceof Server || ($ena=$this->checkEnable($info['slug']))) {
             if (!($ena??false)) // 如果没有加入启用列表，则加入
                 $this->ena_plugins[]=$info['slug'];
-            foreach ((array) $plugin->hook() as $hook)
-                $this->hooks[$hook['hook']]=['plugin'=>$plugin,'func'=>$hook['func']];
+            foreach ((array) $plugin->hook() as $hook) {
+                $p=['plugin'=>$plugin];
+                if (isset($hook['func'])) {
+                    $p['func']=$hook['func'];
+                } else {
+                    $p['method']=$hook['method'];
+                }
+                $this->hooks[$hook['hook']][]=$p;
+            }
         }
     }
 
@@ -75,7 +92,7 @@ class Manager
      * @param mixed $data
      * @param bool $last
      * @param bool $returnArray
-     * @return array|string|null
+     * @return mixed
      */
     public function trigger($hook_name, $default=null, $data=null, $last=false, $returnArray=false)
     {
@@ -84,18 +101,17 @@ class Manager
         if ($returnArray) $return=[];
         if ($last) {
             $hook=Arr::last($hooks);
-            if (is_callable([$hook['plugin'],$hook['func']])) {
-                $return=$hook['plugin']->$hook['func']($data);
-                if ($returnArray) $return=[$return];
-                $hasRun=true;
+            $result=$this->singleRun($hook,$data,$hasRun);
+            if ($hasRun) {
+                if ($returnArray) $return=[$result];
+                else $return=$result;
             }
         } else {
             foreach ((array) $hooks as $hook) {
-                if (is_callable([$hook['plugin'],$hook['func']])) {
-                    $result=$hook['plugin']->$hook['func']($data);
+                $result=$this->singleRun($hook,$data,$hasRun);
+                if ($hasRun) {
                     if ($returnArray) $return[]=$result;
                     else $return.=$result;
-                    $hasRun=true;
                 }
             }
         }
@@ -104,5 +120,18 @@ class Manager
             if ($returnArray) $return=[$return];
         }
         return $return;
+    }
+
+    protected function singleRun($hook, $data, &$hasRun)
+    {
+        if (isset($hook['func']) && is_callable($hook['func'])) {
+            $hasRun=true;
+            return $hook['func']($data);
+        }
+        if (isset($hook['method']) && is_callable([$hook['plugin'],$hook['method']])) {
+            $hasRun=true;
+            return $hook['func']($data);
+        }
+        return null;
     }
 }

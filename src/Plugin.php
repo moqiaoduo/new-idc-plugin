@@ -17,7 +17,8 @@ interface Plugin
 
     /**
      * 定义hook
-     * 格式： ['hook'=>'','func'=>'']
+     * 格式： ['hook'=>'','method'=>''] 或 ['hook'=>'','func'=>'']
+     * 区别在于 method 为类内方法，func是函数（一般为匿名函数）
      *
      * @return mixed
      */
