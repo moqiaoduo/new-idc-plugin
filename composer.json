@@ -32,7 +32,7 @@
                 "NewIDC\\Plugin\\ServiceProvider"
             ],
             "aliases": {
-                "Plugin": "NewIDC\\Plugin\\Facade\\PluginManager"
+                "PluginManager": "NewIDC\\Plugin\\Facade\\PluginManager"
             }
         }
     }
