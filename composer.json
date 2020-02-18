@@ -24,5 +24,15 @@
         "files": [
             "src/helpers.php"
         ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "NewIDC\\Plugin\\ServiceProvider"
+            ],
+            "aliases": {
+                "Plugin": "NewIDC\\Plugin\\Facade\\PluginManager"
+            }
+        }
     }
 }

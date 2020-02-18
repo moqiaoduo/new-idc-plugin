@@ -16,10 +16,10 @@ interface Plugin
     public function info(): array ;
 
     /**
-     * 插件所定义的事件
-     * 需要返回完整的命名空间和类名
+     * 定义hook
+     * 格式： ['hook'=>'','func'=>'']
      *
-     * @return array
+     * @return mixed
      */
-    public function events(): array ;
+    public function hook();
 }

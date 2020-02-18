@@ -1,8 +1,6 @@
 <?php
 
-
 namespace NewIDC\Plugin;
-
 
 abstract class Server implements Plugin
 {
@@ -44,8 +42,8 @@ abstract class Server implements Plugin
         ];
     }
 
-    public function events(): array
+    public function hook()
     {
-
+        // TODO: Implement hook() method.
     }
 }

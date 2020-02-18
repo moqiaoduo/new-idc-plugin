@@ -2,11 +2,12 @@
 
 namespace NewIDC\Plugin;
 
+use Illuminate\Support\Arr;
+
 /**
  * 插件将遵循Laravel扩展包开发方法开发
- * 在服务提供类boot方法中注册插件，才能被监听者触发
- * 很残念的是，这个管理类的作用只是监测插件是否允许执行（
- * 为了让事件订阅者正常工作，将会先初始化再注册
+ * 插件通过调用register方法注册hook
+ * 程序则在指定位置触发hook
  */
 class Manager
 {
@@ -15,32 +16,34 @@ class Manager
      *
      * @var array
      */
-    private static $plugins = [];
+    private $plugins = [];
 
-    /**
-     * 启用的插件
-     *
-     * @var array
-     */
-    private static $ena_plugins = [];
+    private $ena_plugins;
 
-    public static function init()
+    private $hooks = [];
+
+    public function __construct()
     {
-        self::$ena_plugins=json_decode(getOption('ena_plugins'),true)?:[];
+        $this->ena_plugins=json_decode(getOption('ena_plugins'),true)?:[];
     }
 
     /**
      * 不是所有的插件都能手动开关
      * Server插件只要存在即开启
+     * 插件在boot方法务必执行一下，否则无法正常识别
      *
-     * @param $plugin
+     * @param Plugin $plugin 插件对象
      */
-    public static function register(Plugin &$plugin)
+    public function register($plugin)
     {
         // 传入plugin对象，自动注册hook以及加入插件列表
-        $info=$plugin->info();self::$plugins[]=$info;
-        if ($plugin instanceof Server && !self::checkEnable($info['slug']))
-            self::$ena_plugins[]=$info['slug'];
+        $this->plugins[]=$info=$plugin->info();
+        if ($plugin instanceof Server || ($ena=$this->checkEnable($info['slug']))) {
+            if (!($ena??false)) // 如果没有加入启用列表，则加入
+                $this->ena_plugins[]=$info['slug'];
+            foreach ((array) $plugin->hook() as $hook)
+                $this->hooks[$hook['hook']]=['plugin'=>$plugin,'func'=>$hook['func']];
+        }
     }
 
     /**
@@ -48,13 +51,41 @@ class Manager
      *
      * @return array
      */
-    public static function pList()
+    public function pList()
     {
-        return self::$plugins;
+        return $this->plugins;
     }
 
-    public static function checkEnable($slug)
+    public function checkEnable($slug)
     {
-        return in_array($slug,self::$ena_plugins);
+        return in_array($slug,$this->ena_plugins);
+    }
+
+    public function trigger($hook, $default=null, $data=null, $last=false, $returnArray=false)
+    {
+        $hasRun=false;$return=null;
+        if ($returnArray) $return=[];
+        if ($last) {
+            $hook=Arr::last($this->hooks[$hook]);
+            if (is_callable([$hook['plugin'],$hook['func']])) {
+                $return=$hook['plugin']->$hook['func']($data);
+                if ($returnArray) $return=[$return];
+                $hasRun=true;
+            }
+        } else {
+            foreach ((array) $this->hooks[$hook] as $hook) {
+                if (is_callable([$hook['plugin'],$hook['func']])) {
+                    $result=$hook['plugin']->$hook['func']($data);
+                    if ($returnArray) $return[]=$result;
+                    else $return.=$result;
+                    $hasRun=true;
+                }
+            }
+        }
+        if (!$hasRun && is_callable($default)) {
+            $return=$default($data);
+            if ($returnArray) $return=[$return];
+        }
+        return $return;
     }
 }
