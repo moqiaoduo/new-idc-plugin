@@ -47,10 +47,10 @@ class Manager
     public function register($plugin)
     {
         // 传入plugin对象，自动注册hook以及加入插件列表
-        $this->plugins[]=$info=$plugin->info();
-        if ($plugin instanceof Server || ($ena=$this->checkEnable($info['slug']))) {
+        $this->plugins[]=$plugin->info();$id=get_class($plugin);
+        if ($plugin instanceof Server || ($ena=$this->checkEnable($id))) {
             if (!($ena??false)) // 如果没有加入启用列表，则加入
-                $this->ena_plugins[]=$info['slug'];
+                $this->ena_plugins[]=$id;
             foreach ((array) $plugin->hook() as $hook) {
                 $p=['plugin'=>$plugin];
                 if (isset($hook['func'])) {
@@ -76,12 +76,12 @@ class Manager
     /**
      * 检查插件是否启用
      *
-     * @param $slug
+     * @param $id
      * @return bool
      */
-    public function checkEnable($slug)
+    public function checkEnable($id)
     {
-        return in_array($slug,$this->ena_plugins);
+        return in_array($id,$this->ena_plugins);
     }
 
     /**
