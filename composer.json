@@ -9,10 +9,9 @@
             "email": "415372363@qq.com"
         }
     ],
-    "minimum-stability": "dev",
     "require": {
         "php": ">=7.0.0",
-        "laravel/framework": "^6.2",
+        "laravel/framework": "~6.0",
         "ext-json": "*"
     },
     "require-dev": {
