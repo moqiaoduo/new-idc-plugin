@@ -44,7 +44,7 @@ class Manager
      *
      * @param Plugin $plugin 插件对象
      */
-    public function register($plugin)
+    public function register(Plugin $plugin)
     {
         // 传入plugin对象，自动注册hook以及加入插件列表
         $this->plugins[]=$plugin->info();$id=get_class($plugin);
