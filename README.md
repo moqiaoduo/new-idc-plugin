@@ -12,7 +12,7 @@ composer require moqiaoduo/new-idc-plugin
 
 在hook位置调用 PluginManager::trigger
 
-如果有插件列表，调用 PluginManager::pList 获取列表，调用 PluginManager::checkEnable 获取插件是否启用
+如果有插件列表，调用 PluginManager::getList 获取列表，调用 PluginManager::checkEnable 获取插件是否启用
 
 That's all.
 
