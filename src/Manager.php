@@ -54,7 +54,7 @@ class Manager
     public function register(Plugin $plugin)
     {
         // 传入plugin对象，自动注册hook以及加入插件列表
-        $this->plugins[]=$plugin->info();$id=get_class($plugin);
+        $id=get_class($plugin);$this->plugins[$id]=$plugin->info();
         if (($isServer=($plugin instanceof Server)) || ($ena=$this->checkEnable($id))) {
             if (!($ena??false)) // 如果没有加入启用列表，则加入
                 $this->ena_plugins[]=$id;
