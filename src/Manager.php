@@ -26,6 +26,13 @@ class Manager
     private $ena_plugins;
 
     /**
+     * 服务器插件列表
+     *
+     * @var array
+     */
+    private $server_plugins = [];
+
+    /**
      * 定义钩子列表
      *
      * @var array
@@ -48,9 +55,10 @@ class Manager
     {
         // 传入plugin对象，自动注册hook以及加入插件列表
         $this->plugins[]=$plugin->info();$id=get_class($plugin);
-        if ($plugin instanceof Server || ($ena=$this->checkEnable($id))) {
+        if (($isServer=($plugin instanceof Server)) || ($ena=$this->checkEnable($id))) {
             if (!($ena??false)) // 如果没有加入启用列表，则加入
                 $this->ena_plugins[]=$id;
+            if ($isServer) $this->server_plugins[]=$id;
             foreach ((array) $plugin->hook() as $hook) {
                 $p=['plugin'=>$plugin];
                 if (isset($hook['func'])) {
@@ -68,9 +76,29 @@ class Manager
      *
      * @return array
      */
-    public function pList()
+    public function getList()
     {
         return $this->plugins;
+    }
+
+    /**
+     * 列出启用的插件
+     *
+     * @return array
+     */
+    public function getEnableList()
+    {
+        return $this->ena_plugins;
+    }
+
+    /**
+     * 获取服务器插件列表
+     *
+     * @return array
+     */
+    public function getServerPluginList()
+    {
+        return $this->server_plugins;
     }
 
     /**
