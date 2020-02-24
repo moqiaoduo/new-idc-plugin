@@ -115,19 +115,29 @@ class Manager
     /**
      * 触发钩子
      *
-     * @param string $hook_name
-     * @param string|callable|null $default
-     * @param mixed $data
-     * @param bool $last
-     * @param bool $returnArray
+     * @param array $params
      * @return mixed
      */
-    public function trigger($hook_name, $default=null, $data=null, $last=false, $returnArray=false)
+    public function trigger($params)
     {
+        $default_params=[
+            'default_func'=>'',
+            'data'=>null,
+            'last'=>false,
+            'returnArray'=>false
+        ];
+        if (is_array($params)) {
+            $params=array_merge($default_params,$params);
+        } else {
+            $params=$default_params;
+            $params['hook']=$params;
+        }
         $hasRun=false;$return=null;
-        $hooks=$this->hooks[$hook_name]??[];
+        $hooks=$this->hooks[$params['hook']]??[];
+        $data=$params['data'];
+        $returnArray=$params['returnArray'];
         if ($returnArray) $return=[];
-        if ($last) {
+        if ($params['last']) {
             $hook=Arr::last($hooks);
             $result=$this->singleRun($hook,$data,$hasRun);
             if ($hasRun) {
@@ -143,8 +153,8 @@ class Manager
                 }
             }
         }
-        if (!$hasRun && is_callable($default)) {
-            $return=$default($data);
+        if (!$hasRun && is_callable($func=$params['default_func'])) {
+            $return=$func($data);
             if ($returnArray) $return=[$return];
         }
         return $return;
