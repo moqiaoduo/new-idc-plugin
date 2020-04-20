@@ -2,7 +2,8 @@
 
 namespace NewIDC\Plugin;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Product;
+use App\Models\Service;
 
 abstract class Server implements Plugin
 {
@@ -37,23 +38,35 @@ abstract class Server implements Plugin
     /**
      * 服务模型
      *
-     * @var Model
+     * @var Service
      */
     protected $service;
 
     /**
      * 服务器模型
      *
-     * @var Model
+     * @var \App\Models\Server
      */
     protected $server;
 
     /**
      * 产品模型
      *
-     * @var Model
+     * @var Product
      */
     protected $product;
+
+    /**
+     * @param Service $service
+     * @param \App\Models\Server $server
+     * @param Product $product
+     */
+    public function __construct(Service $service, \App\Models\Server $server, Product $product)
+    {
+        $this->service = $service;
+        $this->server = $server;
+        $this->product = $product;
+    }
 
     /**
      * 服务激活时的操作
@@ -62,6 +75,7 @@ abstract class Server implements Plugin
      * ['code'=>状态码(0为成功标准),'message'=>错误信息]
      * 状态码和错误信息主要用于调试
      * 其他返回值不接受
+     * 如果需要修改extra字段，直接更新就行了
      *
      * @return array
      */
