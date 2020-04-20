@@ -236,7 +236,7 @@ abstract class Server implements Plugin
      * @param $service
      * @param $server
      */
-    public function init(Product $product, Service $service, \App\Models\Server $server)
+    public function init(?Product $product, ?Service $service, ?\App\Models\Server $server)
     {
         $this->product = $product;
         $this->service = $service;
