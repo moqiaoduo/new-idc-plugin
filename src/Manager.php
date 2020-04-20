@@ -117,11 +117,12 @@ class Manager
      *
      * @param string $hookName
      * @param mixed $data
-     * @param bool $hasRun
+     * @param callable|null $default
      * @return mixed
      */
-    public function trigger($hookName, $data, &$hasRun)
+    public function trigger($hookName, $data = null, $default = null)
     {
+        $hasRun = false;
         $hooks = $this->hooks[$hookName] ?? [];
         foreach ((array)$hooks as $hook) {
             if (isset($hook['func']) && is_callable($hook['func'])) {
@@ -130,6 +131,16 @@ class Manager
             } elseif (isset($hook['method']) && is_callable([$hook['plugin'], $hook['method']])) {
                 $hasRun = true;
                 $return[] = $hook['plugin']->$hook['method']($data);
+            }
+        }
+        if (!$hasRun) {
+            if (is_callable($default)) {
+                if (is_array($default)) {
+                    [$obj, $method] = $default;
+                    $return[] = $obj->$method($data);
+                } else {
+                    $return[] = $default($data);
+                }
             }
         }
         return $return ?? [];
