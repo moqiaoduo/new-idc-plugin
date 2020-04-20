@@ -57,18 +57,6 @@ abstract class Server implements Plugin
     protected $product;
 
     /**
-     * @param Service $service
-     * @param \App\Models\Server $server
-     * @param Product $product
-     */
-    public function __construct(Service $service, \App\Models\Server $server, Product $product)
-    {
-        $this->service = $service;
-        $this->server = $server;
-        $this->product = $product;
-    }
-
-    /**
      * 服务激活时的操作
      *
      * 所有操作均需要返回：
@@ -157,7 +145,7 @@ abstract class Server implements Plugin
                 $result = false;
         }
         if ($result)
-            $this->service->update(['status'=>$status]);
+            $this->service->update(['status' => $status]);
         return $result;
     }
 
@@ -176,42 +164,60 @@ abstract class Server implements Plugin
      *
      * @return array
      */
-    static public function otherConfig() {return array();}
+    static public function otherConfig()
+    {
+        return array();
+    }
 
     /**
      * 产品配置
      *
      * @return array
      */
-    static public function productConfig() {return array();}
+    static public function productConfig()
+    {
+        return array();
+    }
 
     /**
      * 用户前端设置
      *
      * @return array
      */
-    static public function userConfig() {return array();}
+    static public function userConfig()
+    {
+        return array();
+    }
 
     /**
      * 升降级产品设置
      *
      * @return array
      */
-    static public function upgradeDowngradeConfig() {return array();}
+    static public function upgradeDowngradeConfig()
+    {
+        return array();
+    }
 
     /**
      * 升降级前端设置
      *
      * @return array
      */
-    static public function userUpgradeDowngradeConfig() {return array();}
+    static public function userUpgradeDowngradeConfig()
+    {
+        return array();
+    }
 
     /**
      * 域名设置
      *
      * @return array
      */
-    static public function domainConfig() {return array();}
+    static public function domainConfig()
+    {
+        return array();
+    }
 
     /**
      * 默认端口
@@ -230,11 +236,11 @@ abstract class Server implements Plugin
      * @param $service
      * @param $server
      */
-    public function init($product,$service,$server)
+    public function init(Product $product, Service $service, \App\Models\Server $server)
     {
-        $this->product=$product;
-        $this->service=$service;
-        $this->server=$server;
+        $this->product = $product;
+        $this->service = $service;
+        $this->server = $server;
     }
 
     /**
@@ -246,9 +252,9 @@ abstract class Server implements Plugin
     public function info(): array
     {
         return [
-            'name'=>$this->name,
-            'version'=>$this->version,
-            'description'=>$this->description
+            'name' => $this->name,
+            'version' => $this->version,
+            'description' => $this->description
         ];
     }
 
