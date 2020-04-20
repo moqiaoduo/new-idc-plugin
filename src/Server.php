@@ -144,7 +144,7 @@ abstract class Server implements Plugin
             default:
                 $result = false;
         }
-        if ($result)
+        if ($result['code'] === 0)
             $this->service->update(['status' => $status]);
         return $result;
     }
