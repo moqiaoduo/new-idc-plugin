@@ -93,9 +93,10 @@ abstract class Server implements Plugin
     /**
      * 修改密码时的操作
      *
+     * @param string $password
      * @return array
      */
-    abstract public function changePassword();
+    abstract public function changePassword($password);
 
     /**
      * 服务信息（显示在服务详情中）
