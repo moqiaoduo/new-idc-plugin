@@ -101,10 +101,9 @@ abstract class Server implements Plugin
     /**
      * 服务信息（显示在服务详情中）
      *
-     * @param bool $ajax
      * @return array
      */
-    abstract public function serviceInfo($ajax = false);
+    abstract public function serviceInfo();
 
     /**
      * 升降级操作
