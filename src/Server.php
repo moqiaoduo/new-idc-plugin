@@ -262,4 +262,25 @@ abstract class Server implements Plugin
     {
         return [];
     }
+
+    /**
+     * 获取主机名/IP
+     *
+     * @return string
+     */
+    protected function getHost()
+    {
+        return $this->server->api_access_address == 'hostname' && $this->server->hostname ?
+            $this->server->hostname : $this->server->ip;
+    }
+
+    /**
+     * 获取端口
+     *
+     * @return int
+     */
+    protected function getPort()
+    {
+        return $this->server->port ?: $this->defaultPort();
+    }
 }
