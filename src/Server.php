@@ -107,13 +107,6 @@ abstract class Server implements Plugin
     abstract public function serviceInfo($ajax = false);
 
     /**
-     * 用量查询
-     *
-     * @return array
-     */
-    abstract public function usage();
-
-    /**
      * 升降级操作
      *
      * @return array
