@@ -1,5 +1,5 @@
 {
-    "name": "moqiaoduo/new-idc-plugin",
+    "name": "newidc/plugin",
     "description": "NewIDC插件管理器",
     "type": "library",
     "license": "MIT",

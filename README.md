@@ -5,7 +5,7 @@
 安装本扩展到NewIDC，要求基础框架Laravel 6.2，且存在options表
 
 ```
-composer require moqiaoduo/new-idc-plugin
+composer require newidc/plugin
 ```
 
 在插件的服务提供者的boot方法中调用 PluginManager::register
