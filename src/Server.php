@@ -99,13 +99,6 @@ abstract class Server implements Plugin
     abstract public function changePassword($password);
 
     /**
-     * 服务信息（显示在服务详情中）
-     *
-     * @return array
-     */
-    abstract public function serviceInfo();
-
-    /**
      * 升降级操作
      *
      * @return array
@@ -282,5 +275,16 @@ abstract class Server implements Plugin
     protected function getPort()
     {
         return $this->server->port ?: $this->defaultPort();
+    }
+
+    /**
+     * 服务信息（显示在服务详情中）
+     * 0.3.3开始，非必须方法
+     *
+     * @return array
+     */
+    public function serviceInfo()
+    {
+        return array();
     }
 }
