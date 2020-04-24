@@ -77,11 +77,11 @@ abstract class Server implements Plugin
     abstract public function suspend();
 
     /**
-     * 服务恢复时的操作
+     * 服务解除暂停时的操作
      *
      * @return array
      */
-    abstract public function recover();
+    abstract public function unsuspend();
 
     /**
      * 服务销毁时的操作
@@ -104,36 +104,6 @@ abstract class Server implements Plugin
      * @return array
      */
     abstract public function upgradeDowngrade();
-
-    /**
-     * 改变服务状态
-     *
-     * @param $status
-     * @return bool
-     */
-    public function changeServiceStatusTo($status)
-    {
-        switch ($status) {
-            case 'active':
-                if ($this->service->status === 'suspended') {
-                    $result = $this->recover();
-                } else {
-                    $result = $this->activate();
-                }
-                break;
-            case 'suspended':
-                $result = $this->suspend();
-                break;
-            case 'terminated':
-                $result = $this->terminate();
-                break;
-            default:
-                $result = false;
-        }
-        if ($result['code'] === 0)
-            $this->service->update(['status' => $status]);
-        return $result;
-    }
 
     public function userLogin()
     {
@@ -286,5 +256,52 @@ abstract class Server implements Plugin
     public function serviceInfo()
     {
         return array();
+    }
+
+    /**
+     * 执行插件命令
+     *
+     * @param string $command
+     * @param mixed $payload
+     * @return array
+     */
+    public function command($command, $payload = null)
+    {
+        switch ($command) {
+            case 'create':
+                $result = $this->activate();
+                if ($result['code'] === 0)
+                    $this->service->update(['status' => 'active']);
+                break;
+            case 'suspend':
+                $result = $this->suspend();
+                if ($result['code'] === 0)
+                    $this->service->update(['status' => 'suspended']);
+                break;
+            case 'unsuspend':
+                $result = $this->unsuspend();
+                if ($result['code'] === 0)
+                    $this->service->update(['status' => 'active']);
+                break;
+            case 'terminate':
+                $result = $this->terminate();
+                if ($result['code'] === 0)
+                    $this->service->update(['status' => 'terminated']);
+                break;
+            case 'change_password':
+                if (is_null($payload)) $password = $this->service->password;
+                else $password = $payload;
+                $result = $this->changePassword($password);
+                if ($result['code'] === 0) {
+                    $this->service->password = $password;
+                    $this->service->save();
+                }
+                break;
+            default:
+                if (!method_exists($this, $command))
+                    return ['code' => 0, 'msg' => 'Method does not Exist'];
+                $result = $this->$command($payload);
+        }
+        return $result;
     }
 }
