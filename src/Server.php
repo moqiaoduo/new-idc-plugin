@@ -29,13 +29,6 @@ abstract class Server implements Plugin
     protected $description;
 
     /**
-     * 类型默认为其他
-     *
-     * @var string
-     */
-    protected $type = 'others';
-
-    /**
      * 服务模型
      *
      * @var Service
