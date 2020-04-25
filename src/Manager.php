@@ -53,7 +53,14 @@ class Manager
     {
         // 传入plugin对象，自动注册hook以及加入插件列表
         $id = get_class($plugin);
+        $composer_lock = json_decode(file_get_contents(base_path('composer.lock')), true);
         $this->plugins[$id] = $plugin->info();
+        foreach (($composer_lock['packages'] ?? []) as $package) {
+            if ($package['name']===($this->plugins[$id]['composer'] ?? null)) {
+                $this->plugins[$id]['version'] = $package['version'];
+                break;
+            }
+        }
         if (($isServer = ($plugin instanceof Server)) || ($ena = $this->checkEnable($id))) {
             if (!($ena ?? false)) // 如果没有加入启用列表，则加入
                 $this->ena_plugins[] = $id;
