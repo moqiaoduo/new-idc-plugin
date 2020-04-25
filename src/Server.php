@@ -15,7 +15,18 @@ abstract class Server implements Plugin
     protected $name;
 
     /**
+     * 插件composer名称
+     * 非必须，使用该名称可以检索到release版本
+     * 若未检索到则调用插件设定的插件版本
+     *
+     * @var string
+     */
+    protected $composer;
+
+    /**
      * 插件版本
+     * composer和version只用填写一个
+     * composer检测版本会覆盖version设置
      *
      * @var string
      */
@@ -200,11 +211,16 @@ abstract class Server implements Plugin
      */
     public function info(): array
     {
-        return [
+        $data = [
             'name' => $this->name,
-            'version' => $this->version,
             'description' => $this->description
         ];
+        if (!empty($this->composer)) {
+            $data['composer'] = $this->composer;
+        } else {
+            $data['version'] = $this->version;
+        }
+        return $data;
     }
 
     /**
