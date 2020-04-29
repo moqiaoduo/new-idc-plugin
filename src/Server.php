@@ -111,11 +111,21 @@ abstract class Server implements Plugin
      */
     abstract public function upgradeDowngrade();
 
+    /**
+     * 用户区登录
+     *
+     * @return string
+     */
     public function userLogin()
     {
         return "None";
     }
 
+    /**
+     * 管理区登录
+     *
+     * @return string
+     */
     public function adminLogin()
     {
         return "None";
@@ -339,7 +349,9 @@ abstract class Server implements Plugin
                 break;
             default:
                 if (!method_exists($this, $command))
-                    return ['code' => 0, 'msg' => 'Method does not Exist'];
+                    return ['code' => -1, 'msg' => 'Method does not Exist'];
+                if (!is_callable([$this, $command]))
+                    return ['code' => -2, 'msg' => 'Method is not callable'];
                 $result = $this->$command($payload);
         }
         return $result;
