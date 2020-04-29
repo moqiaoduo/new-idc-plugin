@@ -128,7 +128,7 @@ abstract class Server implements Plugin
      */
     static public function otherConfig()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -138,7 +138,7 @@ abstract class Server implements Plugin
      */
     static public function productConfig()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -148,7 +148,7 @@ abstract class Server implements Plugin
      */
     static public function userConfig()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -158,7 +158,7 @@ abstract class Server implements Plugin
      */
     static public function upgradeDowngradeConfig()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -168,7 +168,7 @@ abstract class Server implements Plugin
      */
     static public function userUpgradeDowngradeConfig()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -178,7 +178,7 @@ abstract class Server implements Plugin
      */
     static public function domainConfig()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -266,7 +266,19 @@ abstract class Server implements Plugin
      */
     public function serviceInfo()
     {
-        return array();
+        return [];
+    }
+
+    /**
+     * 后端服务设置项
+     * 仅限编辑服务时使用，会从数据库自动填充extra数据
+     * 目前系统已占用suspend_reason，请勿使用
+     *
+     * @return array
+     */
+    public function serviceConfig()
+    {
+        return [];
     }
 
     /**
