@@ -4,6 +4,8 @@ namespace NewIDC\Plugin;
 
 use App\Models\Product;
 use App\Models\Service;
+use App\Notifications\ServiceSuspend;
+use App\Notifications\ServiceUnsuspend;
 
 abstract class Server implements Plugin
 {
@@ -284,13 +286,30 @@ abstract class Server implements Plugin
                 break;
             case 'suspend':
                 $result = $this->suspend();
-                if ($result['code'] === 0)
-                    $this->service->update(['status' => 'suspended']);
+                if ($result['code'] === 0) {
+                    $service = $this->service;
+                    $service->status = 'suspended';
+                    if (empty($payload['suspend_reason']))
+                        $reason = __('service.expire_suspend');
+                    else
+                        $reason = $payload['suspend_reason'];
+                    $extra = $service->extra;
+                    $extra['suspend_reason'] = $reason;
+                    $service->extra = $extra;
+                    $service->save();
+                    if (isset($payload['mail'])) {
+                        $service->user->notify(new ServiceSuspend($service));
+                    }
+                }
                 break;
             case 'unsuspend':
                 $result = $this->unsuspend();
-                if ($result['code'] === 0)
+                if ($result['code'] === 0) {
                     $this->service->update(['status' => 'active']);
+                    if (isset($payload['mail'])) {
+                        $this->service->user->notify(new ServiceUnsuspend($this->service));
+                    }
+                }
                 break;
             case 'terminate':
                 $result = $this->terminate();
