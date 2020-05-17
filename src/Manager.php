@@ -2,6 +2,8 @@
 
 namespace NewIDC\Plugin;
 
+use Illuminate\Support\Arr;
+
 /**
  * 插件将遵循Laravel扩展包开发方法开发
  * 插件通过调用register方法注册hook
@@ -39,13 +41,13 @@ class Manager
 
     public function __construct()
     {
-        $this->ena_plugins = json_decode(getOption('ena_plugins'), true) ?: [];
+        $this->ena_plugins = Arr::wrap(json_decode(getOption('ena_plugins'), true));
     }
 
     /**
      * 不是所有的插件都能手动开关
      * Server插件只要存在即开启
-     * 插件在boot方法务必执行一下，否则无法正常识别
+     * 插件在boot方法务必注册一下，否则无法正常识别
      *
      * @param Plugin $plugin 插件对象
      */
@@ -65,14 +67,15 @@ class Manager
             if (!($ena ?? false)) // 如果没有加入启用列表，则加入
                 $this->ena_plugins[] = $id;
             if ($isServer) $this->server_plugins[] = $id;
-            foreach ((array)$plugin->hook() as $hook) {
+            foreach (Arr::wrap($plugin->hook()) as $hook) {
+                $hook_name = $hook['hook'];
                 $p = ['plugin' => $plugin];
                 if (isset($hook['func'])) {
                     $p['func'] = $hook['func'];
                 } else {
                     $p['method'] = $hook['method'];
                 }
-                $this->hooks[$hook['hook']][] = $p;
+                $this->hooks[$hook_name][] = $p;
             }
         }
     }
