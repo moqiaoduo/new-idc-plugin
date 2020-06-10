@@ -63,7 +63,7 @@ class Manager
                 break;
             }
         }
-        if (($isServer = ($plugin instanceof Server)) || ($ena = $this->checkEnable($id))) {
+        if (($isServer = ($plugin instanceof Server)) || ($ena = $this->isEnable($id))) {
             if (!($ena ?? false)) // 如果没有加入启用列表，则加入
                 $this->ena_plugins[] = $id;
             if ($isServer) $this->server_plugins[] = $id;
@@ -111,12 +111,23 @@ class Manager
     }
 
     /**
-     * 检查插件是否启用
+     * 是否为服务器插件
      *
      * @param $id
      * @return bool
      */
-    public function checkEnable($id)
+    public function isServerPlugin($id)
+    {
+        return in_array($id, $this->server_plugins);
+    }
+
+    /**
+     * 插件是否启用
+     *
+     * @param $id
+     * @return bool
+     */
+    public function isEnable($id)
     {
         return in_array($id, $this->ena_plugins);
     }
