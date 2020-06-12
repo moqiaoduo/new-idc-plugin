@@ -103,13 +103,13 @@ class Manager
     }
 
     /**
-     * 列出启用的插件（包括服务器插件）
+     * 列出启用的插件（不包括服务器插件）
      *
      * @return array
      */
     public function getEnableList()
     {
-        return array_merge($this->ena_plugins, $this->server_plugins);
+        return $this->ena_plugins;
     }
 
     /**
@@ -135,14 +135,13 @@ class Manager
 
     /**
      * 插件是否启用
-     * 如果是服务器插件，也视为启用，但并不在ena_plugins中
      *
      * @param $id
      * @return bool
      */
     public function isEnable($id)
     {
-        return in_array($id, $this->ena_plugins) || $this->isServerPlugin($id);
+        return in_array($id, $this->ena_plugins);
     }
 
     /**
