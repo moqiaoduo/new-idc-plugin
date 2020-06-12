@@ -39,6 +39,13 @@ class Manager
      */
     private $hooks = [];
 
+    /**
+     * composer.lock缓存
+     *
+     * @var array
+     */
+    private $_composer_lock = [];
+
     public function __construct()
     {
         $this->ena_plugins = Arr::wrap(json_decode(getOption('ena_plugins'), true));
@@ -55,17 +62,22 @@ class Manager
     {
         // 传入plugin对象，自动注册hook以及加入插件列表
         $id = get_class($plugin);
-        $composer_lock = json_decode(file_get_contents(base_path('composer.lock')), true);
+
+        // 优先读取缓存
+        if (empty($this->_composer_lock))
+            $this->_composer_lock = $composer_lock =
+                json_decode(file_get_contents(base_path('composer.lock')), true);
+        else
+            $composer_lock = $this->_composer_lock;
+
         $this->plugins[$id] = $plugin->info();
         foreach (($composer_lock['packages'] ?? []) as $package) {
-            if ($package['name']===($this->plugins[$id]['composer'] ?? null)) {
+            if ($package['name'] === ($this->plugins[$id]['composer'] ?? null)) {
                 $this->plugins[$id]['version'] = $package['version'];
                 break;
             }
         }
-        if (($isServer = ($plugin instanceof Server)) || ($ena = $this->isEnable($id))) {
-            if (!($ena ?? false)) // 如果没有加入启用列表，则加入
-                $this->ena_plugins[] = $id;
+        if (($isServer = ($plugin instanceof Server)) || $this->isEnable($id)) {
             if ($isServer) $this->server_plugins[] = $id;
             foreach (Arr::wrap($plugin->hook()) as $hook) {
                 $hook_name = $hook['hook'];
@@ -91,13 +103,13 @@ class Manager
     }
 
     /**
-     * 列出启用的插件
+     * 列出启用的插件（包括服务器插件）
      *
      * @return array
      */
     public function getEnableList()
     {
-        return $this->ena_plugins;
+        return array_merge($this->ena_plugins, $this->server_plugins);
     }
 
     /**
@@ -123,13 +135,14 @@ class Manager
 
     /**
      * 插件是否启用
+     * 如果是服务器插件，也视为启用，但并不在ena_plugins中
      *
      * @param $id
      * @return bool
      */
     public function isEnable($id)
     {
-        return in_array($id, $this->ena_plugins);
+        return in_array($id, $this->ena_plugins) || $this->isServerPlugin($id);
     }
 
     /**
