@@ -46,6 +46,13 @@ class Manager
      */
     private $_composer_lock = [];
 
+    /**
+     * 指向一个实际变量
+     *
+     * @var bool
+     */
+    private $_plugged;
+
     public function __construct()
     {
         $this->ena_plugins = Arr::wrap(json_decode(getOption('ena_plugins'), true));
@@ -148,34 +155,52 @@ class Manager
      * 触发钩子
      * 结果以数组形式返回
      *
-     * @param string $hookName
-     * @param mixed $data
-     * @param callable|null $default
+     * @param string $name
+     * @param array $arguments
      * @return mixed
      */
-    public function trigger($hookName, $data = null, $default = null)
+    public function __call($name, $arguments)
     {
         $hasRun = false;
-        $hooks = $this->hooks[$hookName] ?? [];
-        foreach ((array)$hooks as $hook) {
-            if (isset($hook['func']) && is_callable($hook['func'])) {
+
+        $return = [];
+
+        $hooks = $this->hooks[$name] ?? [];
+
+        foreach ((array)$hooks as $hook=>$callable) {
+            if (is_callable($callable)) {
+                $return[] = call_user_func($callable, ...$arguments);
                 $hasRun = true;
-                $return[] = $hook['func']($data);
-            } elseif (isset($hook['method']) && is_callable([$hook['plugin'], $hook['method']])) {
-                $hasRun = true;
-                $return[] = $hook['plugin']->$hook['method']($data);
             }
         }
-        if (!$hasRun) {
-            if (is_callable($default)) {
-                if (is_array($default)) {
-                    [$obj, $method] = $default;
-                    $return[] = $obj->$method($data);
-                } else {
-                    $return[] = $default($data);
-                }
-            }
-        }
-        return $return ?? [];
+
+        $this->_plugged = $hasRun;
+
+        return $return;
+    }
+
+    /**
+     * 绑定结果变量
+     *
+     * @param $var
+     * @return $this
+     */
+    public function trigger(&$var)
+    {
+        $var = false;
+
+        $this->_plugged = &$var;
+
+        return $this;
+    }
+
+    /**
+     * 为了不经过门面传输参数，先获取原始对象
+     *
+     * @return $this
+     */
+    public function handler()
+    {
+        return $this;
     }
 }
