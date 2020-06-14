@@ -86,15 +86,9 @@ class Manager
         }
         if (($isServer = ($plugin instanceof Server)) || $this->isEnable($id)) {
             if ($isServer) $this->server_plugins[] = $id;
-            foreach (Arr::wrap($plugin->hook()) as $hook) {
-                $hook_name = $hook['hook'];
-                $p = ['plugin' => $plugin];
-                if (isset($hook['func'])) {
-                    $p['func'] = $hook['func'];
-                } else {
-                    $p['method'] = $hook['method'];
-                }
-                $this->hooks[$hook_name][] = $p;
+            foreach (Arr::wrap($plugin->hook()) as $name=>$hook) {
+                if (is_callable($hook))
+                    $this->hooks[$name][] = $hook;
             }
         }
     }
