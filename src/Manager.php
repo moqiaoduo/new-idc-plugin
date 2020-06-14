@@ -178,9 +178,9 @@ class Manager
 
         $hooks = $this->hooks[$name] ?? [];
 
-        foreach ((array)$hooks as $hook=>$callable) {
+        foreach ((array)$hooks as $id=>$callable) {
             if (is_callable($callable)) {
-                $return[] = call_user_func($callable, ...$arguments);
+                $return[$id] = call_user_func($callable, ...$arguments);
                 $hasRun = true;
             }
         }
