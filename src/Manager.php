@@ -67,9 +67,29 @@ class Manager
      */
     public function register(Plugin $plugin)
     {
-        // 传入plugin对象，自动注册hook以及加入插件列表
-        $id = get_class($plugin);
+        $info = $plugin->info();
 
+        if (empty($info['slug']))
+            $id = strtolower(str_replace("\\", "_", get_class($plugin)));
+        else
+            $id = $info['slug'];
+
+        $this->plugins[$id] = $info;
+
+        if (($isServer = ($plugin instanceof Server)) || $this->isEnable($id)) {
+            if ($isServer) $this->server_plugins[] = $id;
+            foreach (Arr::wrap($plugin->hook()) as $name=>$hook) {
+                if (is_callable($hook))
+                    $this->hooks[$name][$id] = $hook;
+            }
+        }
+    }
+
+    /**
+     * 通过composer更新插件版本信息
+     */
+    public function updatePluginVersion()
+    {
         // 优先读取缓存
         if (empty($this->_composer_lock))
             $this->_composer_lock = $composer_lock =
@@ -77,18 +97,15 @@ class Manager
         else
             $composer_lock = $this->_composer_lock;
 
-        $this->plugins[$id] = $plugin->info();
+        $no_composer_plugins = $this->plugins;
+
         foreach (($composer_lock['packages'] ?? []) as $package) {
-            if ($package['name'] === ($this->plugins[$id]['composer'] ?? null)) {
-                $this->plugins[$id]['version'] = $package['version'];
-                break;
-            }
-        }
-        if (($isServer = ($plugin instanceof Server)) || $this->isEnable($id)) {
-            if ($isServer) $this->server_plugins[] = $id;
-            foreach (Arr::wrap($plugin->hook()) as $name=>$hook) {
-                if (is_callable($hook))
-                    $this->hooks[$name][] = $hook;
+            foreach ($no_composer_plugins as $id => $plugin) {
+                if ($package['name'] === ($plugin['composer'] ?? null)) {
+                    $this->plugins[$id]['version'] = $package['version'];
+                    unset($no_composer_plugins[$id]);
+                    break;
+                }
             }
         }
     }
