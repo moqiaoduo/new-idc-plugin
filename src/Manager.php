@@ -113,7 +113,7 @@ class Manager
     }
 
     /**
-     * 列出所有插件
+     * 列出所有插件信息
      *
      * @return array
      */
@@ -162,6 +162,17 @@ class Manager
     public function isEnable($id)
     {
         return in_array($id, $this->ena_plugins);
+    }
+
+    /**
+     * 获取插件信息
+     *
+     * @param $slug
+     * @return mixed|null
+     */
+    public function getPluginInfo($slug)
+    {
+        return $this->plugins[$slug] ?? null;
     }
 
     /**
