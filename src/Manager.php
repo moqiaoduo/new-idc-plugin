@@ -69,15 +69,17 @@ class Manager
     {
         $info = $plugin->info();
 
+        $class = get_class($plugin);
+
         if (empty($info['slug']))
-            $id = strtolower(str_replace("\\", "_", get_class($plugin)));
+            $id = strtolower(str_replace("\\", "_", $class));
         else
             $id = $info['slug'];
 
         $this->plugins[$id] = $info;
 
         if (($isServer = ($plugin instanceof Server)) || $this->isEnable($id)) {
-            if ($isServer) $this->server_plugins[] = $id;
+            if ($isServer) $this->server_plugins[$id] = $class;
             foreach (Arr::wrap($plugin->hook()) as $name=>$hook) {
                 if (is_callable($hook))
                     $this->hooks[$name][$id] = $hook;
