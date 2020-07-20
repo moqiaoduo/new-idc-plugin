@@ -4,8 +4,10 @@ namespace NewIDC\Plugin;
 
 use App\Models\Product;
 use App\Models\Service;
-use App\Notifications\ServiceSuspend;
-use App\Notifications\ServiceUnsuspend;
+use App\Events\ServiceActivate;
+use App\Events\ServiceSuspend;
+use App\Events\ServiceTerminate;
+use App\Events\ServiceUnsuspend;
 
 abstract class Server implements Plugin
 {
@@ -300,16 +302,18 @@ abstract class Server implements Plugin
      */
     public function command($command, $payload = null)
     {
+        $service = $this->service;
         switch ($command) {
             case 'create':
                 $result = $this->activate();
-                if ($result['code'] === 0)
-                    $this->service->update(['status' => 'active']);
+                if ($result['code'] === 0) {
+                    $service->update(['status' => 'active']);
+                    event(new ServiceActivate($service));
+                }
                 break;
             case 'suspend':
                 $result = $this->suspend();
                 if ($result['code'] === 0) {
-                    $service = $this->service;
                     $service->status = 'suspended';
                     if (empty($payload['suspend_reason']))
                         $reason = __('service.expire_suspend');
@@ -319,24 +323,22 @@ abstract class Server implements Plugin
                     $extra['suspend_reason'] = $reason;
                     $service->extra = $extra;
                     $service->save();
-                    if (isset($payload['mail'])) {
-                        $service->user->notify(new ServiceSuspend($service));
-                    }
+                    event(new ServiceSuspend($service, isset($payload['mail'])));
                 }
                 break;
             case 'unsuspend':
                 $result = $this->unsuspend();
                 if ($result['code'] === 0) {
-                    $this->service->update(['status' => 'active']);
-                    if (isset($payload['mail'])) {
-                        $this->service->user->notify(new ServiceUnsuspend($this->service));
-                    }
+                    $service->update(['status' => 'active']);
+                    event(new ServiceUnsuspend($service, isset($payload['mail'])));
                 }
                 break;
             case 'terminate':
                 $result = $this->terminate();
-                if ($result['code'] === 0)
-                    $this->service->update(['status' => 'terminated']);
+                if ($result['code'] === 0) {
+                    $service->update(['status' => 'terminated']);
+                    event(new ServiceTerminate($service));
+                }
                 break;
             case 'change_password':
                 if (is_null($payload)) $password = $this->service->password;
