@@ -79,7 +79,7 @@ class Manager
         $this->plugins[$id] = $info;
 
         if (($isServer = ($plugin instanceof Server)) || $this->isEnable($id)) {
-            if ($isServer) $this->server_plugins[] = $id;
+            if ($isServer) $this->server_plugins[$id] = $class;
             foreach (Arr::wrap($plugin->hook()) as $name=>$hook) {
                 if (is_callable($hook))
                     $this->hooks[$name][$id] = $hook;
@@ -150,7 +150,7 @@ class Manager
      */
     public function isServerPlugin($id)
     {
-        return in_array($id, $this->server_plugins);
+        return array_key_exists($id, $this->server_plugins);
     }
 
     /**
