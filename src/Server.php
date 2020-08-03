@@ -252,12 +252,14 @@ abstract class Server implements Plugin
     /**
      * 获取主机名/IP
      *
+     * @param bool $api //是否为api方式获取host，0.5.7添加
      * @return string
      */
-    protected function getHost()
+    protected function getHost($api = true)
     {
-        return $this->server->api_access_address == 'hostname' && $this->server->hostname ?
-            $this->server->hostname : $this->server->ip;
+        return $api && $this->server->api_access_address == 'ip' || empty($this->server->hostname) ?
+            $this->server->ip :
+            $this->server->hostname;
     }
 
     /**
